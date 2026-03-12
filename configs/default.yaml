@@ -1,0 +1,30 @@
+seed: 42
+
+dataset:
+  type: synthetic_classification
+  n_samples: 1200
+  n_features: 64
+  n_classes: 4
+  train_ratio: 0.8
+  class_sep: 1.5
+  noise_fraction: 0.02
+
+benchmark:
+  model_types: [linear, mlp]
+
+model:
+  hidden_dim: 128
+  dropout: 0.1
+
+train:
+  batch_size: 64
+  epochs: 8
+  lr: 0.001
+  weight_decay: 0.0001
+
+energy:
+  num_batches: 50
+  proxy_power_w: 35.0
+
+device: cpu
+output_dir: outputs/default
