@@ -59,6 +59,8 @@ The repository also contains ready-to-use materials for resume and interview pre
 - `docs/project_showcase.html`: self-contained project showcase page
 - `docs/resume_pack_zh.md`: Chinese resume/project wording pack
 - `docs/tech_onepager_zh.md`: one-page technical brief for presentation or Q&A
+- `docs/interview_storyline_zh.md`: three-project interview storyline and speaking script
+- `docs/interview_qa_zh.md`: grouped interview Q&A checklist
 
 If you want a quick local demo after running the benchmark, open:
 
