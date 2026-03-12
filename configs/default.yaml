@@ -10,11 +10,13 @@ dataset:
   noise_fraction: 0.02
 
 benchmark:
-  model_types: [linear, mlp]
+  model_types: [linear, mlp, cnn1d, transformer]
+  seeds: [42, 43, 44]
 
 model:
   hidden_dim: 128
   dropout: 0.1
+  transformer_heads: 4
 
 train:
   batch_size: 64

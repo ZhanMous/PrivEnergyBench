@@ -25,10 +25,12 @@ def test_smoke_benchmark(tmp_path: Path):
                 "  class_sep: 1.2",
                 "  noise_fraction: 0.01",
                 "benchmark:",
-                "  model_types: [linear, mlp]",
+                "  model_types: [linear, mlp, cnn1d, transformer]",
+                "  seeds: [7, 8]",
                 "model:",
                 "  hidden_dim: 32",
                 "  dropout: 0.1",
+                "  transformer_heads: 4",
                 "train:",
                 "  batch_size: 32",
                 "  epochs: 2",
@@ -46,8 +48,11 @@ def test_smoke_benchmark(tmp_path: Path):
     )
 
     rows = run_benchmark(str(config_path))
-    assert len(rows) == 2
+    assert len(rows) == 8
     assert (output_dir / "summary.csv").exists()
+    assert (output_dir / "aggregate_summary.csv").exists()
     assert (output_dir / "benchmark_report.md").exists()
+    assert (output_dir / "dashboard.html").exists()
     assert all("val_acc" in row for row in rows)
     assert all("mia_auc" in row for row in rows)
+    assert {row["model"] for row in rows} == {"linear", "mlp", "cnn1d", "transformer"}
