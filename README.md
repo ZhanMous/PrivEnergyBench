@@ -51,3 +51,16 @@ The default configuration runs 3 seeds across 4 model families and produces:
 - a human-readable report in `benchmark_report.md`
 - a showcase page in `dashboard.html`
 - a Pareto-style scatter plot in `pareto.png`
+
+## Interview Materials
+
+The repository also contains ready-to-use materials for resume and interview presentation:
+
+- `docs/project_showcase.html`: self-contained project showcase page
+- `docs/resume_pack_zh.md`: Chinese resume/project wording pack
+- `docs/tech_onepager_zh.md`: one-page technical brief for presentation or Q&A
+
+If you want a quick local demo after running the benchmark, open:
+
+- `outputs/default/dashboard.html`
+- `docs/project_showcase.html`

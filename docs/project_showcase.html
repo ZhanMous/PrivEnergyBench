@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PrivEnergyBench Showcase</title>
+  <style>
+    :root {
+      --bg: #f5efe4;
+      --panel: #fffaf2;
+      --ink: #191814;
+      --muted: #6b6558;
+      --accent: #b45309;
+      --accent2: #0f766e;
+      --line: #ddd2c0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top right, rgba(180, 83, 9, 0.10), transparent 28%),
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.10), transparent 24%),
+        var(--bg);
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 24px 72px; }
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 56px;
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+      max-width: 780px;
+    }
+    .lede {
+      margin-top: 18px;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+    .card, .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: 0 16px 40px rgba(70, 52, 22, 0.06);
+    }
+    .card { padding: 20px; }
+    .label {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+    .big { font-size: 30px; font-weight: 700; margin-bottom: 6px; }
+    .sub { color: var(--muted); font-size: 15px; line-height: 1.5; }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+    .panel { padding: 24px; }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      font-size: 15px;
+    }
+    th {
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 12px;
+    }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin: 10px 0; line-height: 1.55; }
+    .code {
+      white-space: pre-wrap;
+      background: #f3eadc;
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .footer { color: var(--muted); margin-top: 24px; font-size: 14px; }
+    @media (max-width: 860px) {
+      h1 { font-size: 42px; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Portfolio Project / AI Systems Benchmark</div>
+    <h1>PrivEnergyBench</h1>
+    <div class="lede">
+      一个面向 PyTorch 分类模型的三目标评测工具箱，同时报告效用、隐私和能效。它的定位不是“再做一个模型”，而是把模型比较过程标准化、自动化、可展示化。
+    </div>
+
+    <section class="grid">
+      <div class="card">
+        <div class="label">Best Accuracy</div>
+        <div class="big">MLP 0.9208</div>
+        <div class="sub">3 seeds 聚合均值，95% CI 为 ±0.0154。</div>
+      </div>
+      <div class="card">
+        <div class="label">Lowest Energy</div>
+        <div class="big">Linear 0.0164 mJ</div>
+        <div class="sub">最低能耗代理，同时保持 0.8083 的验证精度。</div>
+      </div>
+      <div class="card">
+        <div class="label">Model Families</div>
+        <div class="big">4</div>
+        <div class="sub">linear / mlp / cnn1d / transformer 四类基线统一对比。</div>
+      </div>
+      <div class="card">
+        <div class="label">Benchmark Scale</div>
+        <div class="big">3 Seeds</div>
+        <div class="sub">自动输出 raw runs、aggregate summary、Markdown 报告和 HTML 页面。</div>
+      </div>
+    </section>
+
+    <section class="two-col">
+      <div class="panel">
+        <h2>当前聚合结果</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Val Acc</th>
+              <th>MIA AUC</th>
+              <th>Energy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>MLP</td>
+              <td>0.9208 ± 0.0136</td>
+              <td>0.5549 ± 0.0218</td>
+              <td>0.0533 mJ</td>
+            </tr>
+            <tr>
+              <td>CNN1D</td>
+              <td>0.8569 ± 0.0098</td>
+              <td>0.5344 ± 0.0250</td>
+              <td>0.3471 mJ</td>
+            </tr>
+            <tr>
+              <td>Transformer</td>
+              <td>0.8167 ± 0.0223</td>
+              <td>0.5722 ± 0.0140</td>
+              <td>0.3614 mJ</td>
+            </tr>
+            <tr>
+              <td>Linear</td>
+              <td>0.8083 ± 0.0355</td>
+              <td>0.5260 ± 0.0188</td>
+              <td>0.0164 mJ</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>适合复试怎么讲</h2>
+        <ul>
+          <li>这个项目解决的不是单模型精度问题，而是“如何系统比较模型在精度、隐私风险和能效上的权衡”。</li>
+          <li>我把训练、成员推断、时延测量、能耗代理、统计汇总和可视化统一进一个轻量工具链。</li>
+          <li>项目有明确工程闭环：配置驱动、自动出表、自动出报告、自动出展示页，适合作为后续研究项目的评测底座。</li>
+          <li>相比单纯堆模型，这更能体现我对实验规范、系统化评测和结果表达的理解。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top: 18px;">
+      <h2>演示命令</h2>
+      <div class="code">cd /home/yanshi/PrivEnergyBench
+pip install -r requirements.txt
+pip install -e .
+python -m privenergybench.cli --config configs/default.yaml</div>
+    </section>
+
+    <div class="footer">
+      当前页面基于本地 benchmark 结果整理，用于项目展示和复试讲解，不依赖额外前端框架。
+    </div>
+  </div>
+</body>
+</html>
