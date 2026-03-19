@@ -58,6 +58,7 @@ def collect_predictions(model: nn.Module, loader: DataLoader, device: torch.devi
     model.eval()
     logits_list = []
     labels_list = []
+    inputs_list = []
     total_loss = 0.0
     total_count = 0
 
@@ -71,9 +72,11 @@ def collect_predictions(model: nn.Module, loader: DataLoader, device: torch.devi
             total_count += int(y.shape[0])
             logits_list.append(logits.cpu())
             labels_list.append(y.cpu())
+            inputs_list.append(x.cpu())
 
     logits = torch.cat(logits_list, dim=0)
     labels = torch.cat(labels_list, dim=0)
+    inputs = torch.cat(inputs_list, dim=0)
     probs = torch.softmax(logits, dim=1).numpy()
     pred = probs.argmax(axis=1)
     labels_np = labels.numpy()
@@ -84,4 +87,5 @@ def collect_predictions(model: nn.Module, loader: DataLoader, device: torch.devi
         "acc": acc,
         "probs": probs,
         "labels": labels_np,
+        "inputs": inputs.numpy(),
     }

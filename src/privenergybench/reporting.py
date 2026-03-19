@@ -31,6 +31,8 @@ def aggregate_rows(rows: list[dict]) -> list[dict]:
         "val_acc",
         "mia_auc",
         "mia_acc",
+        "attr_auc",
+        "inversion_risk",
         "latency_ms",
         "avg_power_w",
         "energy_mj",
@@ -80,6 +82,18 @@ def save_markdown_report(rows: list[dict], cfg: dict, path: str | Path) -> None:
         lines.append(
             f"| {row['model']} | {row['val_acc_mean']:.4f}±{row['val_acc_std']:.4f} | {row['mia_auc_mean']:.4f}±{row['mia_auc_std']:.4f} | "
             f"{row['latency_ms_mean']:.4f} | {row['energy_mj_mean']:.4f} | {row['num_params']} |"
+        )
+
+    lines.extend([
+        "",
+        "## Extended Privacy Metrics",
+        "",
+        "| model | attr_auc(mean±std) | inversion_risk(mean±std) |",
+        "|---|---:|---:|",
+    ])
+    for row in summary_rows:
+        lines.append(
+            f"| {row['model']} | {row['attr_auc_mean']:.4f}±{row['attr_auc_std']:.4f} | {row['inversion_risk_mean']:.4f}±{row['inversion_risk_std']:.4f} |"
         )
 
     best_acc = max(summary_rows, key=lambda row: row["val_acc_mean"]) if summary_rows else None
@@ -139,12 +153,16 @@ def save_html_dashboard(rows: list[dict], cfg: dict, path: str | Path) -> None:
     table_rows = []
     for row in aggregate:
         table_rows.append(
-            "<tr><td>{model}</td><td>{acc:.4f}±{acc_std:.4f}</td><td>{mia:.4f}±{mia_std:.4f}</td><td>{lat:.4f}</td><td>{energy:.4f}</td><td>{params}</td></tr>".format(
+            "<tr><td>{model}</td><td>{acc:.4f}±{acc_std:.4f}</td><td>{mia:.4f}±{mia_std:.4f}</td><td>{attr:.4f}±{attr_std:.4f}</td><td>{inv:.4f}±{inv_std:.4f}</td><td>{lat:.4f}</td><td>{energy:.4f}</td><td>{params}</td></tr>".format(
                 model=html.escape(str(row["model"])),
                 acc=row["val_acc_mean"],
                 acc_std=row["val_acc_std"],
                 mia=row["mia_auc_mean"],
                 mia_std=row["mia_auc_std"],
+                attr=row["attr_auc_mean"],
+                attr_std=row["attr_auc_std"],
+                inv=row["inversion_risk_mean"],
+                inv_std=row["inversion_risk_std"],
                 lat=row["latency_ms_mean"],
                 energy=row["energy_mj_mean"],
                 params=row["num_params"],
@@ -195,9 +213,9 @@ def save_html_dashboard(rows: list[dict], cfg: dict, path: str | Path) -> None:
     </section>
     <section class=\"cards\">{''.join(cards)}</section>
     <section class=\"panel\">
-      <h2>Aggregate Table</h2>
+            <h2>Aggregate Table</h2>
       <table>
-        <thead><tr><th>Model</th><th>Val Acc</th><th>MIA AUC</th><th>Latency ms</th><th>Energy mJ</th><th>Params</th></tr></thead>
+                <thead><tr><th>Model</th><th>Val Acc</th><th>MIA AUC</th><th>Attr AUC</th><th>Inversion Risk</th><th>Latency ms</th><th>Energy mJ</th><th>Params</th></tr></thead>
         <tbody>{''.join(table_rows)}</tbody>
       </table>
     </section>

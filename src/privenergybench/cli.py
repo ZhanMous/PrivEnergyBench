@@ -8,7 +8,7 @@ from .config import load_config, save_json
 from .data import build_dataloaders
 from .energy import measure_latency_and_energy
 from .models import build_model, count_parameters
-from .privacy import confidence_membership_inference
+from .privacy import privacy_multi_attack
 from .reporting import aggregate_rows, plot_pareto, save_html_dashboard, save_markdown_report, save_summary_csv
 from .train import collect_predictions, resolve_device, set_seed, train_model
 
@@ -38,7 +38,18 @@ def run_benchmark(config_path: str) -> list[dict]:
             history = train_model(model, train_loader, seed_cfg, device)
             train_eval = collect_predictions(model, train_loader, device)
             val_eval = collect_predictions(model, val_loader, device)
-            privacy = confidence_membership_inference(train_eval["probs"], val_eval["probs"])
+            privacy = privacy_multi_attack(
+                model=model,
+                train_probs=train_eval["probs"],
+                train_labels=train_eval["labels"],
+                train_inputs=train_eval["inputs"],
+                val_probs=val_eval["probs"],
+                val_labels=val_eval["labels"],
+                val_inputs=val_eval["inputs"],
+                device=device,
+                out_dir=out_dir / f"{model_type}_seed{seed}",
+                seed=seed,
+            )
             energy = measure_latency_and_energy(
                 model=model,
                 loader=val_loader,
@@ -57,6 +68,8 @@ def run_benchmark(config_path: str) -> list[dict]:
                 "val_acc": float(val_eval["acc"]),
                 "mia_auc": float(privacy["mia_auc"]),
                 "mia_acc": float(privacy["mia_acc"]),
+                "attr_auc": float(privacy["attr_auc"]),
+                "inversion_risk": float(privacy["inversion_risk"]),
                 "latency_ms": float(energy["latency_ms"]),
                 "avg_power_w": float(energy["avg_power_w"]),
                 "energy_mj": float(energy["energy_mj"]),
