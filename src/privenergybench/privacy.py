@@ -48,30 +48,37 @@ def _safe_auc(y_true: np.ndarray, y_score: np.ndarray) -> float:
     return float(roc_auc_score(y_true, y_score))
 
 
-def _attribute_inference(train_probs: np.ndarray, train_labels: np.ndarray, val_probs: np.ndarray, val_labels: np.ndarray, seed: int) -> dict[str, float]:
+def _attribute_inference(
+    train_probs: np.ndarray,
+    train_attrs: np.ndarray,
+    val_probs: np.ndarray,
+    val_attrs: np.ndarray,
+    seed: int,
+) -> dict[str, float]:
+    """Infer private sensitive attribute from model outputs.
+    
+    Uses only output probabilities and one-hot labels, not private attributes.
+    But in privacy audit, we assume attrs could be inferred from outputs.
+    """
     n_classes = int(train_probs.shape[1])
-    x_train = np.concatenate([train_probs, np.eye(n_classes)[train_labels]], axis=1)
-    x_val = np.concatenate([val_probs, np.eye(n_classes)[val_labels]], axis=1)
-
-    # Synthetic sensitive attribute proxy for benchmark mode.
-    y_train = (train_labels % 2).astype(np.int64)
-    y_val = (val_labels % 2).astype(np.int64)
+    x_train = train_probs  # Use only model outputs as features
+    x_val = val_probs
 
     lr = LogisticRegression(max_iter=500, random_state=seed)
-    lr.fit(x_train, y_train)
+    lr.fit(x_train, train_attrs)
     lr_probs = lr.predict_proba(x_val)[:, 1]
 
     mlp = MLPClassifier(hidden_layer_sizes=(32,), max_iter=300, random_state=seed)
-    mlp.fit(x_train, y_train)
+    mlp.fit(x_train, train_attrs)
     mlp_probs = mlp.predict_proba(x_val)[:, 1]
 
-    lr_auc = _safe_auc(y_val, lr_probs)
-    mlp_auc = _safe_auc(y_val, mlp_probs)
+    lr_auc = _safe_auc(val_attrs, lr_probs)
+    mlp_auc = _safe_auc(val_attrs, mlp_probs)
     return {
         "attr_auc": float(max(lr_auc, mlp_auc)),
         "attr_auc_logreg": float(lr_auc),
         "attr_auc_mlp": float(mlp_auc),
-        "sensitive_attribute_rule": "label_parity",
+        "sensitive_attribute_rule": "feature_sum_threshold",
     }
 
 
@@ -154,15 +161,17 @@ def privacy_multi_attack(
     train_probs: np.ndarray,
     train_labels: np.ndarray,
     train_inputs: np.ndarray,
+    train_attrs: np.ndarray,
     val_probs: np.ndarray,
     val_labels: np.ndarray,
     val_inputs: np.ndarray,
+    val_attrs: np.ndarray,
     device: torch.device,
     out_dir: str | Path,
     seed: int,
 ) -> dict[str, float]:
     mia = confidence_membership_inference(train_probs, val_probs)
-    attr = _attribute_inference(train_probs, train_labels, val_probs, val_labels, seed)
+    attr = _attribute_inference(train_probs, train_attrs, val_probs, val_attrs, seed)
     inversion = _inversion_attack(model, val_probs, val_inputs, device)
 
     radar_path = Path(out_dir) / "privacy_radar.png"

@@ -18,9 +18,14 @@ def measure_latency_and_energy(
     latencies_ms = []
 
     with torch.no_grad():
-        for batch_idx, (x, _y) in enumerate(loader):
+        for batch_idx, batch in enumerate(loader):
             if batch_idx >= num_batches:
                 break
+            if len(batch) == 3:
+                x, _y, _attr = batch
+            else:
+                x, _y = batch
+            
             x = x.to(device)
             if device.type == "cuda":
                 torch.cuda.synchronize(device)

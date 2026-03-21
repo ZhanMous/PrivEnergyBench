@@ -15,14 +15,18 @@ benchmark:
 
 model:
   hidden_dim: 128
-  dropout: 0.1
+  dropout: 0.0
   transformer_heads: 4
+
+sensitive_attribute:
+  feature_indices: [0, 1, 2]  # Use first 3 features as sensitive
+  rule: "sum_threshold"  # sum(features[indices]) > median
 
 train:
   batch_size: 64
-  epochs: 8
+  epochs: 20
   lr: 0.001
-  weight_decay: 0.0001
+  weight_decay: 0
 
 energy:
   num_batches: 50

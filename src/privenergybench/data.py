@@ -33,13 +33,29 @@ def build_synthetic_dataset(cfg: dict, seed: int) -> tuple[TensorDataset, Tensor
         random_state=seed,
     )
 
-    train_ds = TensorDataset(torch.from_numpy(x_train), torch.from_numpy(y_train))
-    val_ds = TensorDataset(torch.from_numpy(x_val), torch.from_numpy(y_val))
+    # Compute sensitive attribute from feature space (independent of labels).
+    attr_cfg = cfg.get("sensitive_attribute", {})
+    feature_indices = attr_cfg.get("feature_indices", [0, 1, 2])
+    rule = attr_cfg.get("rule", "sum_threshold")
+    
+    if rule == "sum_threshold":
+        x_train_attr_scores = x_train[:, feature_indices].sum(axis=1)
+        x_val_attr_scores = x_val[:, feature_indices].sum(axis=1)
+        threshold = float(np.median(x_train_attr_scores))
+        train_attr = (x_train_attr_scores > threshold).astype(np.int64)
+        val_attr = (x_val_attr_scores > threshold).astype(np.int64)
+    else:
+        train_attr = np.zeros(len(x_train), dtype=np.int64)
+        val_attr = np.zeros(len(x_val), dtype=np.int64)
+
+    train_ds = TensorDataset(torch.from_numpy(x_train), torch.from_numpy(y_train), torch.from_numpy(train_attr))
+    val_ds = TensorDataset(torch.from_numpy(x_val), torch.from_numpy(y_val), torch.from_numpy(val_attr))
     meta = {
         "n_features": n_features,
         "n_classes": n_classes,
         "train_samples": int(len(train_ds)),
         "val_samples": int(len(val_ds)),
+        "sensitive_attribute_rule": f"{rule} (features={feature_indices}, threshold={threshold})",
     }
     return train_ds, val_ds, meta
 

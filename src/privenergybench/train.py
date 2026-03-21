@@ -35,7 +35,12 @@ def train_model(model: nn.Module, train_loader: DataLoader, cfg: dict, device: t
     for epoch in range(int(tcfg["epochs"])):
         total_loss = 0.0
         total_count = 0
-        for x, y in train_loader:
+        for batch in train_loader:
+            if len(batch) == 3:
+                x, y, _ = batch  # Ignore sensitive attribute during training
+            else:
+                x, y = batch
+            
             x = x.to(device)
             y = y.to(device)
             optimizer.zero_grad(set_to_none=True)
@@ -59,11 +64,18 @@ def collect_predictions(model: nn.Module, loader: DataLoader, device: torch.devi
     logits_list = []
     labels_list = []
     inputs_list = []
+    attrs_list = []
     total_loss = 0.0
     total_count = 0
 
     with torch.no_grad():
-        for x, y in loader:
+        for batch in loader:
+            if len(batch) == 3:
+                x, y, attr = batch
+            else:
+                x, y = batch
+                attr = None
+            
             x = x.to(device)
             y = y.to(device)
             logits = model(x)
@@ -73,6 +85,8 @@ def collect_predictions(model: nn.Module, loader: DataLoader, device: torch.devi
             logits_list.append(logits.cpu())
             labels_list.append(y.cpu())
             inputs_list.append(x.cpu())
+            if attr is not None:
+                attrs_list.append(attr.cpu())
 
     logits = torch.cat(logits_list, dim=0)
     labels = torch.cat(labels_list, dim=0)
@@ -81,6 +95,8 @@ def collect_predictions(model: nn.Module, loader: DataLoader, device: torch.devi
     pred = probs.argmax(axis=1)
     labels_np = labels.numpy()
     acc = float((pred == labels_np).mean())
+    
+    attrs_np = np.concatenate(attrs_list, axis=0) if attrs_list else np.zeros(len(labels), dtype=np.int64)
 
     return {
         "loss": total_loss / max(total_count, 1),
@@ -88,4 +104,5 @@ def collect_predictions(model: nn.Module, loader: DataLoader, device: torch.devi
         "probs": probs,
         "labels": labels_np,
         "inputs": inputs.numpy(),
+        "attrs": attrs_np,
     }
